@@ -16,12 +16,17 @@ if ENV['BEAKER_HYPERVISOR'] == 'vagrant_libvirt'
   require 'beaker-rspec'
 
   hosts.each do |host|
-    next unless host['platform'].include?('ubuntu')
+    next unless host['platform'].to_s.start_with?('debian', 'ubuntu')
 
-    result = host.exec(
-      Beaker::Command.new('sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved'),
-    )
-    raise "failed to disable DNSSEC on #{host}: #{result}" unless result.exit_code.zero?
+    on(host, <<~SHELL)
+      if [ ! -f /usr/share/dns/root.key ] &&
+         [ -f /etc/systemd/resolved.conf ] &&
+         [ "$(ps -p 1 -o comm= 2>/dev/null)" = "systemd" ] &&
+         grep -q '^#*DNSSEC=yes' /etc/systemd/resolved.conf; then
+        sed -i 's/^#*DNSSEC=.*/DNSSEC=no/' /etc/systemd/resolved.conf
+        systemctl restart systemd-resolved
+      fi
+    SHELL
   end
 end
 
