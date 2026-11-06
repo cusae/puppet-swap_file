@@ -16,7 +16,7 @@ if ENV['BEAKER_HYPERVISOR'] == 'vagrant_libvirt'
 
     host.exec!(
       'sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved',
-      'disable DNSSEC validation in test VM'
+      'disable DNSSEC validation in test VM',
     )
   end
 end
