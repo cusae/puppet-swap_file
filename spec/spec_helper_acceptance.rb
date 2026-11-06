@@ -18,7 +18,9 @@ if ENV['BEAKER_HYPERVISOR'] == 'vagrant_libvirt'
   hosts.each do |host|
     next unless host['platform'].include?('ubuntu')
 
-    result = host.exec('sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved')
+    result = host.exec(
+      Beaker::Command.new('sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved'),
+    )
     raise "failed to disable DNSSEC on #{host}: #{result}" unless result.exit_code.zero?
   end
 end
