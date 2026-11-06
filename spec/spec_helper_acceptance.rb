@@ -11,13 +11,14 @@ require 'voxpupuli/acceptance/spec_helper_acceptance'
 # package installation done by configure_beaker. Disable DNSSEC validation in
 # the test VMs before that happens.
 if ENV['BEAKER_HYPERVISOR'] == 'vagrant_libvirt'
+  require 'beaker-hiera'
+  require 'beaker_puppet_helpers'
+  require 'beaker-rspec'
+
   hosts.each do |host|
     next unless host['platform'].include?('ubuntu')
 
-    host.exec!(
-      'sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved',
-      'disable DNSSEC validation in test VM',
-    )
+    host.exec!('sed -i "s/^#*DNSSEC=.*/DNSSEC=no/" /etc/systemd/resolved.conf && systemctl restart systemd-resolved')
   end
 end
 
